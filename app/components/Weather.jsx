@@ -3,6 +3,7 @@ var WeatherForm = require('WeatherForm');
 var WeatherMessage = require('WeatherMessage');
 var ErrorModal = require('ErrorModal');
 var openWeatherMap = require('openWeatherMap');
+var cityAutoComplete = require('cityAutoCompleteAPI');
 
 var Weather = React.createClass({
   getInitialState: function () {
@@ -21,6 +22,30 @@ var Weather = React.createClass({
     });
 
     openWeatherMap.getTemp(location).then(function (temp) {
+      that.setState({
+        location: location,
+        temp: temp,
+        isLoading: false
+      });
+    }, function (e) {
+      that.setState({
+        isLoading: false,
+        errorMessage: e.message
+      });
+    });
+  },
+  handleAutoComplete: function (location) {
+    var that = this;
+
+    this.setState({
+      isLoading: true,
+      errorMessage: undefined,
+      location: undefined,
+      temp: undefined
+    });
+
+    cityAutoComplete.getTemp(location).then(function (temp) {
+      console.log("Result" + temp);
       that.setState({
         location: location,
         temp: temp,
@@ -71,7 +96,7 @@ var Weather = React.createClass({
     return (
       <div>
         <h1 className="text-center page-title">Get Weather</h1>
-        <WeatherForm onSearch={this.handleSearch}/>
+        <WeatherForm onSearch={this.handleSearch} autoCompleteCities={this.handleAutoComplete}/>
         {renderMessage()}
         {renderError()}
       </div>
